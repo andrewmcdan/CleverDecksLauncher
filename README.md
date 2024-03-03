@@ -21,7 +21,7 @@ You can download the pre-built executable from the [releases page](https://githu
 You can run the executable directly, but only if you are using the fully packaged version of CleverDecks. In this case, the CleverDecks.exe file should be in the same directory as the CleverDecksLauncher.exe file.
 
 
-Otherwise, you will need to specify the path to the index.js in the root of the CleverDecks project as a command line argument.
+Otherwise, you will need to specify the path to the index.js in the root of the CleverDecks project as a command line argument. This does require that you have Node.js installed on your system.
 ```
 ./CleverDecksLauncher.exe "C:\path\to\CleverDecks\index.js"
 ```
