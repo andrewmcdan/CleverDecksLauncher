@@ -85,7 +85,7 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Form1";
             ShowInTaskbar = false;
-            Text = "Form1";
+            Text = "CleverDecks Launcher";
             WindowState = FormWindowState.Minimized;
             ResumeLayout(false);
             PerformLayout();

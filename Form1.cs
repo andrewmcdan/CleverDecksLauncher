@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Windows.Forms;
 using System;
-using System.Windows.Forms;
 
 namespace CleverDecksLauncher
 {
@@ -64,16 +63,16 @@ namespace CleverDecksLauncher
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
             };
-
-            if (cl_args.Length == 0)
+            
+            if (cl_args.Length == 0 && CheckFileExists("CleverDecks.exe"))
             {
                 startInfo.FileName = "CleverDecks.exe";
             }
-            else if (cl_args.Length == 1 && cl_args[0].EndsWith(".exe"))
+            else if (cl_args.Length == 1 && cl_args[0].EndsWith(".exe") && CheckFileExists(cl_args[0]))
             {
                 startInfo.FileName = cl_args[0];
             }
-            else if (cl_args.Length == 1 && cl_args[0].EndsWith(".js"))
+            else if (cl_args.Length == 1 && cl_args[0].EndsWith(".js") && CheckFileExists(cl_args[0]))
             {
                 startInfo.FileName = "node";
                 startInfo.Arguments = cl_args[0];
@@ -84,6 +83,16 @@ namespace CleverDecksLauncher
                 }
                 startInfo.WorkingDirectory = cl_args[0].Substring(0, lastSlash);
             }
+            else
+            {
+                bool fileExists = false;
+                if(cl_args.Length == 1)
+                {
+                    fileExists = CheckFileExists(cl_args[0]);
+                }
+                ShowErrorNotification("Unable to launch CleverDecks." + (fileExists?"":" Specified file does not exist."));
+                Application.Exit();
+            }
             var startsInfo = new ProcessStartInfo
             {
                 FileName = "node",
@@ -93,11 +102,35 @@ namespace CleverDecksLauncher
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
             };
-            nodeProcess = Process.Start(startInfo);
+            try
+            {
+                nodeProcess = Process.Start(startInfo);
+            }
+            catch (Exception ex)
+            {
+                ShowErrorNotification("Unable to launch CleverDecks." + ex.Message.Substring(0,ex.Message.Length>64?64:ex.Message.Length));
+                Application.Exit();
+            }
             nodeProcess.OutputDataReceived += NodeProcess_OutputDataReceived;
             nodeProcess.BeginOutputReadLine();
             isCleverDecksRunning = true;
 
+        }
+
+        private bool CheckFileExists(string path)
+        {
+            // checkif path is absolute or relative
+            if (System.IO.Path.IsPathRooted(path))
+            {
+                return System.IO.File.Exists(path);
+            }
+            else
+            {
+                // check if the file exists in the current directory
+                var currentDir = System.IO.Directory.GetCurrentDirectory();
+                path = System.IO.Path.Combine(currentDir, path);
+                return System.IO.File.Exists(path);
+            }
         }
 
         private void NodeProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
