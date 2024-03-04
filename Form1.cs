@@ -191,7 +191,7 @@ namespace CleverDecksLauncher
             }
             catch (Exception ex)
             {
-
+                // just eat the exception, om nom nom
             }
         }
 
