@@ -1,14 +1,17 @@
 using System.Diagnostics;
 using System.Windows.Forms;
 using System;
+using QRCoder;
 
 namespace CleverDecksLauncher
 {
     public partial class Form1 : Form
     {
+
         private Process nodeProcess;
         private bool isCleverDecksRunning = false;
         private string[] cl_args;
+        private string qrCodeText = "";
         public Form1(string[] args)
         {
             cl_args = args;
@@ -18,6 +21,7 @@ namespace CleverDecksLauncher
             this.FormClosing += MainForm_FormClosing;
             notifyIcon1.DoubleClick += notifyIcon1_DoubleClick;
             this.Load += MainForm_Load;
+            qrBox.Visible = false;
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -34,14 +38,17 @@ namespace CleverDecksLauncher
         {
             var showOutputMenuItem = new ToolStripMenuItem("Show Log Window");
             var launchBrowserMenuItem = new ToolStripMenuItem("Launch in Browser");
+            var showQRCodeMenuItem = new ToolStripMenuItem("Show QR Code");
             var quitMenuItem = new ToolStripMenuItem("Quit");
 
             showOutputMenuItem.Click += ShowOutputMenuItem_Click;
             launchBrowserMenuItem.Click += LaunchBrowserMenuItem_Click;
+            showQRCodeMenuItem.Click += ShowQRCodeMenuItem_Click;
             quitMenuItem.Click += QuitMenuItem_Click;
 
             contextMenuStrip1.Items.Add(showOutputMenuItem);
             contextMenuStrip1.Items.Add(launchBrowserMenuItem);
+            contextMenuStrip1.Items.Add(showQRCodeMenuItem);
             contextMenuStrip1.Items.Add(quitMenuItem);
 
             notifyIcon1.ContextMenuStrip = contextMenuStrip1;
@@ -52,7 +59,13 @@ namespace CleverDecksLauncher
         {
             this.WindowState = FormWindowState.Minimized;
             this.ShowInTaskbar = false;
+            qrBox.Click += qrBox_Click;
             LaunchNodeApp();
+        }
+
+        private void qrBox_Click(object sender, EventArgs e)
+        {
+            qrBox.Visible = false;
         }
 
         private void LaunchNodeApp()
@@ -62,6 +75,7 @@ namespace CleverDecksLauncher
                 CreateNoWindow = true,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
+                RedirectStandardInput = true,
             };
             
             if (cl_args.Length == 0 && CheckFileExists("CleverDecks.exe"))
@@ -101,6 +115,7 @@ namespace CleverDecksLauncher
                 CreateNoWindow = true,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
+                RedirectStandardInput = true,
             };
             try
             {
@@ -113,6 +128,7 @@ namespace CleverDecksLauncher
             }
             nodeProcess.OutputDataReceived += NodeProcess_OutputDataReceived;
             nodeProcess.BeginOutputReadLine();
+            
             isCleverDecksRunning = true;
 
         }
@@ -140,6 +156,12 @@ namespace CleverDecksLauncher
                 // Invoke the UI thread to update the TextBox
                 this.Invoke(new Action(() =>
                 {
+                    if (e.Data.Contains("http://") && qrCodeText.Equals(""))
+                    {
+                        // extract the http address from the log
+                        int start = e.Data.IndexOf("http://");
+                        qrCodeText = e.Data.Substring(start);
+                    }
                     textBox1.AppendText(e.Data + Environment.NewLine);
                     if(autoScrollCheckBox.Checked)
                     {
@@ -180,9 +202,15 @@ namespace CleverDecksLauncher
 
         private void LaunchBrowserMenuItem_Click(object sender, EventArgs e)
         {
+            if(qrCodeText.Equals(""))
+            {
+                ShowErrorNotification("QR Code not available. Please try again later.");
+                return;
+            }
+            
             var startInfo = new ProcessStartInfo
             {
-                FileName = "http://localhost:3000",
+                FileName = qrCodeText,
                 UseShellExecute = true
             };
             try
@@ -197,8 +225,36 @@ namespace CleverDecksLauncher
 
         private void QuitMenuItem_Click(object sender, EventArgs e)
         {
+            var quitTask = Task.Run(() =>
+            {
+                nodeProcess.StandardInput.WriteLine("terminate");
+                nodeProcess.WaitForExit(5000);
+            });
+
+            quitTask.Wait(5000);
             nodeProcess?.Kill();
             Application.Exit();
+        }
+
+        private void ShowQRCodeMenuItem_Click(object sender, EventArgs e)
+        {
+            if (qrCodeText.Equals(""))
+            {
+                ShowErrorNotification("QR Code not available. Please try again later.");
+            }
+            else
+            {
+                using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+                using (QRCodeData qrCodeData = qrGenerator.CreateQrCode(qrCodeText, QRCodeGenerator.ECCLevel.Q))
+                using (QRCode qrCode = new QRCode(qrCodeData))
+                {
+                    Bitmap qrCodeImage = qrCode.GetGraphic(8);
+                    qrBox.Image = qrCodeImage;
+                    qrBox.Visible = true;
+                    this.ShowInTaskbar = true;
+                    this.WindowState = FormWindowState.Normal;
+                }
+            }
         }
 
         private void notifyIcon1_DoubleClick(object sender, EventArgs e)

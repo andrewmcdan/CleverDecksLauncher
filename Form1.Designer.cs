@@ -34,6 +34,8 @@
             contextMenuStrip1 = new ContextMenuStrip(components);
             textBox1 = new TextBox();
             autoScrollCheckBox = new CheckBox();
+            qrBox = new PictureBox();
+            ((System.ComponentModel.ISupportInitialize)qrBox).BeginInit();
             SuspendLayout();
             // 
             // notifyIcon1
@@ -75,11 +77,20 @@
             autoScrollCheckBox.UseVisualStyleBackColor = true;
             autoScrollCheckBox.CheckedChanged += checkBox1_CheckedChanged;
             // 
+            // qrBox
+            // 
+            qrBox.Location = new Point(155, 7);
+            qrBox.Name = "qrBox";
+            qrBox.Size = new Size(300, 300);
+            qrBox.TabIndex = 3;
+            qrBox.TabStop = false;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(624, 314);
+            Controls.Add(qrBox);
             Controls.Add(autoScrollCheckBox);
             Controls.Add(textBox1);
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -87,6 +98,7 @@
             ShowInTaskbar = false;
             Text = "CleverDecks Launcher";
             WindowState = FormWindowState.Minimized;
+            ((System.ComponentModel.ISupportInitialize)qrBox).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -97,5 +109,6 @@
         private ContextMenuStrip contextMenuStrip1;
         private TextBox textBox1;
         private CheckBox autoScrollCheckBox;
+        private PictureBox qrBox;
     }
 }

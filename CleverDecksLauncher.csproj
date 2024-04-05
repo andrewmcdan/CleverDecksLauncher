@@ -15,4 +15,8 @@
     <Content Include="a5l2s-qw706-001.ico" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="QRCoder" Version="1.4.3" />
+  </ItemGroup>
+
 </Project>
