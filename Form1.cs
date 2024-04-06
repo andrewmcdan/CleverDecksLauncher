@@ -63,6 +63,7 @@ namespace CleverDecksLauncher
         {
             AboutForm aboutForm = new AboutForm();
             aboutForm.Show();
+            aboutForm.DeselecAll();
         }
 
         private void NextAddrButton_Click(object sender, EventArgs e)
