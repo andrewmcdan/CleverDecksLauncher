@@ -29,3 +29,7 @@ Otherwise, you will need to specify the path to the index.js in the root of the 
 My preferred method is to create a shortcut to the executable and add the path to the index.js file as an argument in the shortcut's properties.
 
 Once running, the launcher will appear in the system tray. Right-clicking the icon will show the context menu, which allows you to see the logs, quit, and open the CleverDecks web interface.
+
+## License
+
+CleverDecksLauncher is licensed under the AGL-3.0 license. See the LICENSE file for more information. This software use the QRCoder library, which is licensed under the MIT license. See [codebude/QRCoder](https://github.com/codebude/QRCoder) for more information.
